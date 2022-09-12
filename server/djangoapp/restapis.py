@@ -10,22 +10,28 @@ api_key = "gvC3xjh3epZkb2X8hyN0b45oQ55ep0P0E5F0a6w69I2JFLYRZojGJMOohjKC4IPq"
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 
-def get_request(url, **kwargs):
-    print(kwargs)
-    print("GET from {} ".format(url))
-    try:
-        # Call get method of requests library with URL and parameters
-        # response = requests.post(url,auth=HTTPBasicAuth(api_user, api_key))
-        response = requests.get(url, params=kwargs, auth=HTTPBasicAuth(apikey, api_key))
-        print("debug  {}".format(response))
-    except:
-        # If any error occurs
-        print("Network exception occurred")
-        return
+def get_request(url, api_key=False, **kwargs):
+    print(f"GET from {url}")
+    if api_key:
+        # Basic authentication GET
+        try:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
+        except:
+            print("An error occurred while making GET request. ")
+    else:
+        # No authentication GET
+        try:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs)
+        except:
+            print("An error occurred while making GET request. ")
+
+    # Retrieving the response status code and content
     status_code = response.status_code
-    print("With status {} ".format(status_code))
-    print("debug  {}".format(response.text))
+    print(f"With status {status_code}")
     json_data = json.loads(response.text)
+
     return json_data
 
 # Create a `post_request` to make HTTP POST requests
