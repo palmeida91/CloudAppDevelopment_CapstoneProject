@@ -20,15 +20,16 @@ body {
 /* LINKS */
 
 a:link, a:visited {
-    color: #447e9b;
+    color: #000000;
     text-decoration: none;
 }
 
 a:focus, a:hover {
-    color: #036;
+    color: rgb(0, 0, 0);
 }
 
 a:focus {
+    color: #000000;
     text-decoration: underline;
 }
 

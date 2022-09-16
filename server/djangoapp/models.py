@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
+import datetime
 
 
 # Create your models here.
@@ -11,10 +12,10 @@ from django.utils.timezone import now
 # - __str__ method to print a car make object
 class CarMake(models.Model):
     name = models.CharField(null=False, max_length=30)
-    description = models.CharField(max_length=60)
+    description = models.CharField(null=True, max_length=60)
 
     def __str__(self):
-        return self.name + " " + self.description
+        return self.name
 
 
 # <HINT> Create a Car Model model `class CarModel(models.Model):`:
@@ -28,9 +29,9 @@ class CarMake(models.Model):
 
 class CarModel(models.Model):
     #Many-to-One relationship to CarMake
-    carMake = models.ForeignKey(CarMake, on_delete=models.CASCADE)
+    carMake = models.ForeignKey(CarMake, null=True,on_delete=models.CASCADE)
     name = models.CharField(null=False,max_length=30)
-    dealerId = models.IntegerField(default=0)
+    dealerId = models.IntegerField(null=True)
 
     SEDAN = "Sedan"
     SUV = "SUV"
@@ -39,10 +40,16 @@ class CarModel(models.Model):
     WAGON = "Wagon"
     CAR_CHOICE = [(SEDAN,"Sedan"),(SUV,"SUV"),(HATCHBACK,"Hatchback"),(COUPE,"Coupe"),(WAGON,"Wagon")]
     modelType = models.CharField(max_length=20, choices=CAR_CHOICE, default=SUV)
-    modelYeal = models.DateField()
+   
+    YEAR_CHOICES = []
+    for r in range(1969, (datetime.datetime.now().year+1)):
+        YEAR_CHOICES.append((r, r))
+
+    modelYear = models.IntegerField(
+        ('year'), choices=YEAR_CHOICES, default=datetime.datetime.now().year)
 
     def __str__(self):
-        return self.carMake + " " + self.name + " " + self.modelType + " " + self.modelYeal
+        return self.name + " " + self.modelType + " " + str(self.modelYear)
 
 
 # <HINT> Create a plain Python class `CarDealer` to hold dealer data

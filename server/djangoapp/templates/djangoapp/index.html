@@ -16,7 +16,7 @@
     <body>
     <!--Add a nav bar here -->
     <nav class="navbar navbar-light bg-light">
-        <div class="navbar-brand">Car Dealership</div>
+        <div class="navbar-brand"><a href="{% url 'djangoapp:index' %} ">Car Dealership</a></div>
         <ul class="navbar-nav flex-row mr-auto ml-2 p-1 justify-content-start">
             <li class="nav-item">
             <a class="navbar-brand p-0" href="{% url 'djangoapp:about' %}"> About us</a></li>
@@ -44,7 +44,37 @@
         </ul>
     </nav>
     <!--Add a dealer table here -->
+    <!--Example from the lab instructions, build upon that-->
+    <table class="table" id="table" data-filter-control="true">
+        <thead>
+            <tr>
+                <th data-field="id">ID</th>
+                <th data-field="dealerFullName">Dealer Name</th>
+                <th data-field="city">City</th>
+                <th data-field="address">Address</th>
+                <th data-field="zip">ZIP</th>
+                <th data-field="state" data-filter-control="select">State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealerships %}
+                <tr>
+                    <td>{{dealer.id}}</td>
+                    <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{dealer.full_name}}</a></td>
+                    <td>{{dealer.city}}</td>
+                    <td>{{dealer.address}}</td>
+                    <td>{{dealer.zip}}</td>
+                    <td>{{dealer.state}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <script>
+        $(function(){
+            $('#table').bootstrapTable()
+        })
+    </script>
     </body>
 
 </html>

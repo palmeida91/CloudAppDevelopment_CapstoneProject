@@ -1,14 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
+from .models import CarModel
 # from .models import related models
-from .restapis import get_dealers_from_cf,get_request,get_dealers_by_id,get_dealers_by_state,post_request
+from .restapis import get_dealer_reviews_from_cf, get_dealers_from_cf,get_dealers_by_id,post_request
 from django.contrib.auth import login, logout, authenticate
-from django.contrib import messages
 from datetime import datetime
 import logging
-import json
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -81,13 +79,12 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
+        context = {}
         url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/paulo.vitor102%40gmail.com_djangoserver-space/dealerships/get-dealerships"
         # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        context['dealerships'] = get_dealers_from_cf(url)
+
+        return render(request, 'djangoapp/index.html', context)
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
@@ -96,8 +93,7 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     context = {}
     if request.method == "GET":
-        url = 'https://eu-gb.functions.cloud.ibm.com/api/v1/namespaces/paulo.vitor102%40gmail.com_djangoserver-space/actions/dealerships/get-reviews'
-        # url = 'https://eu-gb.functions.cloud.ibm.com/api/v1/namespaces/paulo.vitor102%40gmail.com_djangoserver-space/actions/dealerships/get-dealerships'
+        url = 'https://eu-gb.functions.appdomain.cloud/api/v1/web/paulo.vitor102%40gmail.com_djangoserver-space/dealerships/get-reviews'
         reviews = get_dealer_reviews_from_cf(url, dealer_id=dealer_id)
         context = {
             "reviews":  reviews, 
@@ -115,11 +111,11 @@ def add_review(request, dealer_id):
     if request.user.is_authenticated:
         # GET request renders the page with the form for filling out a review
         if request.method == "GET":
-            url = f"https://eu-gb.functions.cloud.ibm.com/api/v1/namespaces/paulo.vitor102%40gmail.com_djangoserver-space/actions/dealerships/get-dealerships?dealerId={dealer_id}"
+            url = f"https://eu-gb.functions.appdomain.cloud/api/v1/web/paulo.vitor102%40gmail.com_djangoserver-space/dealerships/get-dealerships?dealerId={dealer_id}"
             # Get dealer details from the API
             context = {
                 "cars": CarModel.objects.all(),
-                "dealer": get_dealer_by_id(url, dealer_id=dealer_id),
+                "dealer": get_dealers_by_id(url, dealer_id=dealer_id),
             }
             return render(request, 'djangoapp/add_review.html', context)
 
@@ -132,11 +128,13 @@ def add_review(request, dealer_id):
             review["review"] = form["content"]
             review["purchase"] = form.get("purchasecheck")
             if review["purchase"]:
+                print(form.get("purchasedate"))
+                print(datetime.strptime(form.get("purchasedate"), "%m/%d/%Y"))
                 review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
             car = CarModel.objects.get(pk=form["car"])
-            review["car_make"] = car.car_make.name
+            review["car_make"] = car.carMake.name
             review["car_model"] = car.name
-            review["car_year"] = car.year
+            review["car_year"] = car.modelYear
             
             # If the user bought the car, get the purchase date
             if form.get("purchasecheck"):
@@ -144,7 +142,7 @@ def add_review(request, dealer_id):
             else: 
                 review["purchase_date"] = None
 
-            url = "https://eu-gb.functions.cloud.ibm.com/api/v1/namespaces/paulo.vitor102%40gmail.com_djangoserver-space/actions/dealerships/post-review"  # API Cloud Function route
+            url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/paulo.vitor102%40gmail.com_djangoserver-space/dealerships/post-review"  # API Cloud Function route
             json_payload = {"review": review}  # Create a JSON payload that contains the review data
 
             # Performing a POST request with the review
