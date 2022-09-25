@@ -173,8 +173,8 @@ def get_dealer_reviews_from_cf(url, dealer_id):
                     dealership=dealership, id=id, name=name, purchase=purchase, review=review_content)
 
             # Analysing the sentiment of the review object's review text and saving it to the object attribute "sentiment"
-            # review_obj.sentiment = analyze_review_sentiments(review_obj.review)
-            # print(f"sentiment: {review_obj.sentiment}")
+            review_obj.sentiment = analyze_review_sentiments(review_obj.review)
+            print(f"sentiment: {review_obj.sentiment}")
 
             # Saving the review object to the list of results
             results.append(review_obj)
@@ -184,20 +184,14 @@ def get_dealer_reviews_from_cf(url, dealer_id):
 
 # Calls the Watson NLU API and analyses the sentiment of a review
 def analyze_review_sentiments(review_text):
-    # Watson NLU configuration
-    try:
-        if os.environ['env_type'] == 'PRODUCTION':
-            url = os.environ['WATSON_NLU_URL']
-            api_key = os.environ["WATSON_NLU_API_KEY"]
-    except KeyError:
-        url = config('WATSON_NLU_URL')
-        api_key = config('WATSON_NLU_API_KEY')
+    # For production keep this as SECRET
+    api_key = "0YANnFqyUNuF4FVh78Vbj6uvVk4KqolZbRfFI34isCBp"
 
     version = '2021-08-01'
     authenticator = IAMAuthenticator(api_key)
     nlu = NaturalLanguageUnderstandingV1(
         version=version, authenticator=authenticator)
-    nlu.set_service_url(url)
+    nlu.set_service_url("https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/10258197-a763-45e6-bbe0-f329bf521911")
 
     # get sentiment of the review
     try:
