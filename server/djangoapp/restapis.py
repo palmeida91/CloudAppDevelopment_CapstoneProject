@@ -24,6 +24,8 @@ def get_request(url, api_key=False, **kwargs):
                                     params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
         except:
             print("An error occurred while making GET request. ")
+            json_data=None
+            response = None
     else:
         # No authentication GET
         try:
@@ -31,11 +33,14 @@ def get_request(url, api_key=False, **kwargs):
                                     params=kwargs)
         except:
             print("An error occurred while making GET request. ")
+            json_data=None
+            response = None
 
     # Retrieving the response status code and content
-    status_code = response.status_code
-    print(f"With status {status_code}")
-    json_data = json.loads(response.text)
+    if response:
+        status_code = response.status_code
+        print(f"With status {status_code}")
+        json_data = json.loads(response.text)
     # print(json_data)
     return json_data
 
@@ -63,6 +68,10 @@ def post_request(url, json_payload, **kwargs):
 def get_dealers_from_cf(url):
     results = []
     json_result = get_request(url)
+
+    # in case of error during get req exits and return empty dict
+    if json_result is None: return {}
+    
     # Retrieve the dealer data from the response
     dealers = json_result["rows"]
     # print(dealers[0]['doc'])
@@ -87,6 +96,9 @@ def get_dealers_by_id(url, dealer_id):
     # Call get_request with the dealer_id param
     json_result = get_request(url, dealerId=dealer_id)
 
+    # in case of error during get req exits and return empty dict
+    if json_result is None: return {}
+
     # Create a CarDealer object from response
     dealer = json_result["docs"][0]
     dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"], full_name=dealer["full_name"],
@@ -100,6 +112,10 @@ def get_dealers_by_state(url, state):
     results = []
     # Call get_request with the state param
     json_result = get_request(url, state=state)
+
+    # in case of error during get req exits and return empty dict
+    if json_result is None: return {}
+
     dealers = json_result["docs"]
     # For each dealer in the response
     for dealer in dealers:
@@ -121,6 +137,8 @@ def get_dealer_reviews_from_cf(url, dealer_id):
     results = []
     # Perform a GET request with the specified dealer id
     json_result = get_request(url, dealerId=dealer_id)
+    # in case of error during get req exits and return empty dict
+    if json_result is None: return {}
 
     if json_result:
         # Get all review data from the response
