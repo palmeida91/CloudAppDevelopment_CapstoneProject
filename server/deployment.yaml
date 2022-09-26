@@ -22,6 +22,8 @@ spec:
       containers:
       - image: us.icr.io/sn-labs-paulovitor10/dealership:latest
         imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo Done Deploying sv-premier; sleep 3600;done"]
         name: dealership
         ports:
         - containerPort: 8000
